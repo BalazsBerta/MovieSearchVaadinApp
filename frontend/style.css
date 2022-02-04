@@ -1,0 +1,32 @@
+.style{
+background: rgb(61,60,75);
+background: linear-gradient(90deg, rgba(61,60,75,0.9416141456582633) 100%, rgba(58,58,79,1) 100%, rgba(0,212,255,1) 100%);
+padding: 0px;
+margin: 0px;
+min-height: 100%;
+width: 100%;
+color: white;
+}
+
+.header-style{
+color: white;
+}
+
+.poster-style{
+
+width: 100%;
+padding: 0px;
+margin: 0px;
+
+}
+.moviedata-style{
+align: center;
+width: 100%;
+padding: 0px;
+margin: 0px;
+color: white;
+}
+.vaadin-textfield{
+
+}
+
