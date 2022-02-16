@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.Console;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -26,47 +27,44 @@ import java.io.InputStream;
 public class MovieService {
     private OkHttpClient client;
     private Response response;
-    private final String key =""; // please register on the omdbapi com site for an Api key
+    private final String key = "f0dcdeea"; // please register on the omdbapi com site for an Api key
     private String title;
 
 
-public JSONObject getMovieData() throws IOException, JSONException {
-    client = new OkHttpClient();
-    Request request = new Request.Builder().url("http://www.omdbapi.com/?t="+getTitle()+"&apikey="+key).build();
-    response = client.newCall(request).execute();
-    return new JSONObject(response.body().string());
-
-    }
-    public JSONArray getMultipleMovieData() throws IOException, JSONException {
+    public JSONObject getMovieData() throws IOException, JSONException {
         client = new OkHttpClient();
-        Request request = new Request.Builder().url("http://www.omdbapi.com/?s="+getTitle()+"&apikey="+key).build();
+        Request request = new Request.Builder().url("http://www.omdbapi.com/?t=" + getTitle() + "&apikey=" + key).build();
         response = client.newCall(request).execute();
-        return new JSONArray(response.body().string());
+        return new JSONObject(response.body().string());
 
     }
-    //-----------------------//PAGINATION FOR MULTIPLE MOVES//--------------
 
-    //public JSONObject getMovieData() throws IOException, JSONException {
-        //client = new OkHttpClient();
-       // Request request = new Request.Builder().url("http://www.omdbapi.com/?t="+getTitle()+"Page=2"+"&apikey="+key).build();
-       // response = client.newCall(request).execute();
-       // return new JSONObject(response.body().string());
+    public JSONObject getMultipleMovieData() throws IOException, JSONException {
+        client = new OkHttpClient();
+        Request request = new Request.Builder().url("http://www.omdbapi.com/?s=" + getTitle() + "&apikey=" + key).build();
+        response = client.newCall(request).execute();
+        return new JSONObject(response.body().string());
 
-   // }
+    }
 
     public JSONArray returnRatings() throws JSONException, IOException {
-    JSONArray ratings = getMovieData().getJSONArray("Ratings");
-    return ratings;
-    }
-    public JSONArray returnMultipleMovie() throws JSONException, IOException{
-    JSONArray movies = getMultipleMovieData().getJSONArray(0);
-    return  movies;
+        JSONArray ratings = getMovieData().getJSONArray("Ratings");
+        return ratings;
     }
 
-public String getTitle(){
-    return title;
+    public JSONArray returnMovies() throws JSONException, IOException {
+        JSONArray multipleMovie = getMovieData().getJSONArray("Search");
+        return multipleMovie;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
 }
-public void  setTitle(String title){
-    this.title = title;
-}
-}
+
+
+

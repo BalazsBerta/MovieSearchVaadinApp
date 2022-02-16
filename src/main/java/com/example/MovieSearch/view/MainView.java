@@ -3,10 +3,11 @@ package com.example.MovieSearch.view;
 import com.example.MovieSearch.service.MovieService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -19,9 +20,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Route("")
 @CssImport("./style.css")
+@CssImport(value = "./text-field.css", themeFor = "vaadin-text-field")
 public class MainView extends VerticalLayout {
 
     @Autowired
@@ -33,43 +38,31 @@ public class MainView extends VerticalLayout {
     private Label runtime;
     private Label plot;
     private TextField movieTitle;
-    private Button movieTitleB;
     private Button multipleSearch;
     private Image image;
-    private Grid grid;
-    private Label proba;
+    private Image posterImages;
+    private Icon iconForw;
+    private Icon iconBackw;
+    private int count;
+    private Label meta;
+    private Label imdb;
+    private Label imdbvotes;
+    private Label posterCount;
+
 
     Notification notification = new Notification("Center notification", 3000, Notification.Position.MIDDLE);
 
 
     public MainView() throws JSONException, IOException {
-
         CreateHeader();
         SearchForm();
-        PosterView();
         MovieDataView();
-        PlotView();
-        MultipleMovie();
-
-        addClassName("style");
-
-        movieTitleB.addClickListener(ClickEvent -> {
-            if (!movieTitle.getValue().equals("")) {
-                try {
-                    Update();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } else {
-                notification.show("please enter  valid MovieTitle");
-            }
-        });
 
         multipleSearch.addClickListener(ClickEvent -> {
             if (!movieTitle.getValue().equals("")) {
                 try {
+                    iconForw.setVisible(true);
+                    iconBackw.setVisible(true);
                     Update2();
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -77,10 +70,42 @@ public class MainView extends VerticalLayout {
                     e.printStackTrace();
                 }
             } else {
+                iconForw.setVisible(false);
+                iconBackw.setVisible(false);
                 notification.show("please enter  valid MovieTitle");
             }
 
             /* lint to an another page ->*/ /*UI.getCurrent().navigate("main");*/
+        });
+        count = 1;
+        iconForw.addClickListener(ClickEvent -> {
+
+            //PostersSteping(count);
+            try {
+                Update();
+                count = count + 1;
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (IndexOutOfBoundsException e) {
+                notification.show("A lista végére értél!");
+                count = 9;
+            }
+        });
+        iconBackw.addClickListener(ClickEvent -> {
+            //PostersSteping(count);
+            try {
+                Update();
+                count = count - 1;
+            } catch (JSONException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (IndexOutOfBoundsException e) {
+                notification.show(" A lista végére értél");
+                count = 0;
+            }
         });
     }
 
@@ -88,10 +113,9 @@ public class MainView extends VerticalLayout {
     public void CreateHeader() {
         HorizontalLayout header = new HorizontalLayout();
         H1 title = new H1("Vaadin Movie app");
-        title.addClassName("header-style");
+        header.addClassName("header-style");
 
-
-        header.setWidth("100%");
+        header.setSizeFull();
         header.add(title);
         header.setJustifyContentMode(JustifyContentMode.CENTER);
         add(header);
@@ -103,70 +127,109 @@ public class MainView extends VerticalLayout {
 
 
         movieTitle = new TextField("please enter a movie title");
-        movieTitleB = new Button("Search");
-        multipleSearch = new Button("Back");
-        movieTitle.setWidth("60%");
+        multipleSearch = new Button("Search");
 
-        movieTitle.addClassName("vaadin-textfield");
-        //mainview.getThemeList().set("dark", true);
-        //movieTitle.getStyle().set("background-color","#ffffff" );
+        movieTitle.setWidth("30%");
+        multipleSearch.setThemeName("primary");
+
+
         mainview.setJustifyContentMode(JustifyContentMode.CENTER);
         mainview.setAlignItems(Alignment.CENTER);
-        mainview.add(movieTitle, movieTitleB, multipleSearch);
+        mainview.add(movieTitle, multipleSearch);
         add(mainview);
 
     }
 
     public void MovieDataView() {
+        HorizontalLayout mainBody = new HorizontalLayout();
         VerticalLayout movieView = new VerticalLayout();
+
+        VerticalLayout moviePosterView = new VerticalLayout();
+        HorizontalLayout iconLayout = new HorizontalLayout();
+        HorizontalLayout ratingView = new HorizontalLayout();
+
+        addClassName("moviedata-style");
+
+        //PosterView----------
+
+        image = new Image();
+        iconForw = new Icon(VaadinIcon.CHEVRON_CIRCLE_RIGHT);
+        iconForw.setVisible(false);
+        iconBackw = new Icon(VaadinIcon.CHEVRON_CIRCLE_LEFT);
+        iconBackw.setVisible(false);
+        posterCount = new Label();
+        posterImages = new Image();
+        // Movie data view --------------
+
         title = new Label();
         year = new Label();
         rated = new Label();
         runtime = new Label();
-
-        addClassName("moviedata-style");
-        movieView.setJustifyContentMode(JustifyContentMode.CENTER);
-        movieView.setAlignItems(Alignment.CENTER);
-        movieView.add(title, year, rated, runtime);
-        add(movieView);
-    }
-
-    public void PlotView() {
-        HorizontalLayout plotview = new HorizontalLayout();
+        meta = new Label();
+        imdb = new Label();
+        imdbvotes = new Label();
         plot = new Label();
 
-        //plotview.getThemeList().set("dark", true);
-        plotview.setJustifyContentMode(JustifyContentMode.CENTER);
-        plotview.setAlignItems(Alignment.CENTER);
-        plotview.add(plot);
-        add(plotview);
+        moviePosterView.setMaxWidth("50");
+        moviePosterView.setHeight("50");
+        movieView.setMaxWidth("50");
+        movieView.setMaxHeight("50");
+        iconLayout.setWidth("25");
+
+        moviePosterView.setJustifyContentMode(JustifyContentMode.CENTER);
+        moviePosterView.setAlignItems(Alignment.CENTER);
+        moviePosterView.setPadding(true);
+        moviePosterView.setMargin(true);
+
+
+        movieView.setJustifyContentMode(JustifyContentMode.CENTER);
+        movieView.setAlignItems(Alignment.CENTER);
+
+
+        mainBody.setJustifyContentMode(JustifyContentMode.CENTER);
+        mainBody.setAlignItems(Alignment.CENTER);
+
+        ratingView.add(meta, imdb, imdbvotes);
+        movieView.add(title, year, rated, runtime, plot, ratingView);
+        iconLayout.add(iconBackw, iconForw, posterCount);
+
+        moviePosterView.add(image, posterImages, iconLayout);
+
+
+        mainBody.add(moviePosterView, movieView);
+        add(mainBody);
     }
 
-    public void PosterView() {
-        HorizontalLayout postview = new HorizontalLayout();
+   /* public void PosterView() {
+        VerticalLayout postview = new VerticalLayout();
+        HorizontalLayout countview = new HorizontalLayout();
+        HorizontalLayout icons = new HorizontalLayout();
+
         postview.addClassName("poster-style");
         image = new Image();
+        iconForw = new Icon(VaadinIcon.CHEVRON_CIRCLE_RIGHT);
+        iconForw.setVisible(false);
+        iconBackw = new Icon(VaadinIcon.CHEVRON_CIRCLE_LEFT);
+        iconBackw.setVisible(false);
+        posterCount = new Label();
+        posterImages = new Image();
 
+        icons.add(iconBackw, iconForw);
+
+        countview.setJustifyContentMode(JustifyContentMode.CENTER);
+        countview.setAlignItems(Alignment.CENTER);
+        countview.add(posterCount);
 
         postview.setJustifyContentMode(JustifyContentMode.CENTER);
         postview.setAlignItems(Alignment.CENTER);
-        postview.add(image);
+        postview.add(image, icons, countview);
         add(postview);
     }
-
-    public void MultipleMovie() {
-        VerticalLayout multipleMovie = new VerticalLayout();
-        grid = new Grid();
-        proba = new Label();
-
-        multipleMovie.add(proba);
-        add(multipleMovie);
-    }
+*/
 
     public void Update() throws JSONException, IOException {
-        //-----  //PAGINATION soon(tm)//----
-        String Mtitle = movieTitle.getValue();
-
+        //-- Plakát váltás közben, a listában lévő cím alapján, lekéri a filmek adatait.
+        String Mtitle = movieNameList.get(count);
         try {
             movieService.setTitle(Mtitle);
 
@@ -176,7 +239,7 @@ public class MainView extends VerticalLayout {
             title.setText(movieTitle);
 
             int releaseYear = mainObject.getInt("Year");
-            year.setText(String.valueOf("movie realase date: " + releaseYear));
+            year.setText("movie realase date: " + releaseYear);
 
             String movieRunTime = mainObject.getString("Runtime");
             runtime.setText(movieRunTime);
@@ -184,57 +247,104 @@ public class MainView extends VerticalLayout {
             String moviePlot = mainObject.getString("Plot");
             plot.setText(moviePlot);
 
+            int posterCounts = count;
+            posterCount.setText(count + 1 + "/10");
             String posterke = mainObject.getString("Poster");
             image.setSrc(posterke);
 
-            JSONArray rat = new JSONArray();
-            String ratings = null;
-            JSONArray ratingsArray = movieService.returnRatings();
-            for (int i = 0; i < ratingsArray.length(); i++) {
-                JSONObject ratingsObject = ratingsArray.getJSONObject(i);
-                //ratings = ratingsObject.getString("Metascore");
-                rat.put(ratingsObject);
-
-            }
-            //rated.setText(String.valueOf(rat));
-
-            for (int i = 0; i < rat.length(); i++) {
-                rated.setText(String.valueOf(rat.getJSONObject(i)));
-            }
-
+            String metascore = mainObject.getString("Metascore");
+            meta.setText("Metascore: " + metascore + " /100");
+            String imdbRating = mainObject.getString("imdbRating");
+            imdb.setText("IMDB rating: " + imdbRating + " /10");
+            String imdbVotes = mainObject.getString("imdbVotes");
+            imdbvotes.setText("Imdb Vote count: " + imdbVotes);
         } catch (Exception e) {
-            notification.show("Enter a real movie title");
+            notification.show("Nem találtunk több filmet ilyen címmel");
         }
-
-
     }
+
+    private List<String> posterList = new ArrayList<String>();
+    private List<String> movieNameList = new ArrayList<String>();
 
     public void Update2() throws JSONException, IOException {
+
         String Mtitle = movieTitle.getValue();
-
         try {
-
+//--- az első film megjelenítése a MovieDataViewnél
             movieService.setTitle(Mtitle);
-            JSONArray multipleObject = movieService.returnMultipleMovie();
-            proba.setText(String.valueOf(multipleObject));
+            JSONObject mainObject = movieService.getMovieData();
 
-           /* JSONArray probaArray  = new JSONArray();
-            JSONArray moviesArray = new JSONArray();
-            moviesArray = movieService.returnMultipleMovie();
-            proba.setText(String.valueOf(multipleObject));
-            for(int i = 0; i < multipleObject.length(); i++){
-                JSONObject movieObject = multipleObject.getJSONObject(i);
-                probaArray.put(movieObject);
+            String movieTitle = mainObject.getString("Title");
+            title.setText(movieTitle);
+
+            int releaseYear = mainObject.getInt("Year");
+            year.setText("movie realase date: " + releaseYear);
+
+            String movieRunTime = mainObject.getString("Runtime");
+            runtime.setText("Duration: " + movieRunTime);
+
+            String moviePlot = mainObject.getString("Plot");
+            plot.setText("Plot: " + moviePlot);
+
+            String poster = mainObject.getString("Poster");
+            image.setSrc(poster);
+
+            String metascore = mainObject.getString("Metascore");
+            meta.setText("Metascore: " + metascore + " /100");
+            String imdbRating = mainObject.getString("imdbRating");
+            imdb.setText("IMDB rating: " + imdbRating + " /10");
+            String imdbVotes = mainObject.getString("imdbVotes");
+            imdbvotes.setText("Imdb Vote count: " + imdbVotes);
+
+
+//-------------------------------------------------------------------------------------------------
+//leszedett 10 film és posztereik listába pakolása
+            System.out.println(movieService.getMultipleMovieData());
+
+            JSONObject multipleMainObject = movieService.getMultipleMovieData();
+
+            JSONArray outMovie = new JSONArray();
+            String type = "";
+            JSONArray multipleMovies = multipleMainObject.getJSONArray("Search");
+
+            for (int i = 0; i < multipleMovies.length(); i++) {
+
+                outMovie.put(multipleMovies.getJSONObject(i).getString("Title"));
             }
-            for( int i = 0; i < probaArray.length(); i++){
-                proba.setText(String.valueOf(probaArray.getJSONObject(i)));
-            }*/
+            JSONArray outPosters = new JSONArray();
+            for (int i = 0; i < multipleMovies.length(); i++) {
+                outPosters.put(multipleMovies.getJSONObject(i).getString("Poster"));
 
+            }
+            posterList = new ArrayList<String>();
+            for (int i = 0; i < outPosters.length(); i++) {
+                posterList.add(outPosters.getString(i));
+            }
+            // posterImages.setSrc(posterList.get(0));
+
+            movieNameList = new ArrayList<String>();
+            for (int i = 0; i < outMovie.length(); i++) {
+                movieNameList.add(outMovie.getString(i));
+            }
+            count = 1;
+            posterCount.setText(count + " /10");
 
         } catch (Exception e) {
-            notification.show("Enter a REAL movie title");
+            iconForw.setVisible(false);
+            iconBackw.setVisible(false);
+            notification.show("The movie you requested,dont exits in this Database, try a new move title");
         }
-    }
 
+    }
+    /* public void PostersSteping(int count) {
+
+        String source = "";
+        String mTitle  = "";
+
+        source = posterList.get(count);
+        movieTitle.setText(source)
+        mTitle = movieNameList.get(count);
+        movieTitle.setText(mTitle);
+}*/
 }
 

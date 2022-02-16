@@ -1,15 +1,16 @@
-.style{
-background: rgb(61,60,75);
-background: linear-gradient(90deg, rgba(61,60,75,0.9416141456582633) 100%, rgba(58,58,79,1) 100%, rgba(0,212,255,1) 100%);
-padding: 0px;
-margin: 0px;
-min-height: 100%;
-width: 100%;
-color: white;
-}
+
+
+html{background-color: #41B3A3;}
+
 
 .header-style{
-color: white;
+background-color: #116466;
+padding: 0px;
+margin: 0px;
+z-index: 1000;
+border-style: solid;
+border-width: 5px;
+border-color: #376E6F;
 }
 
 .poster-style{
@@ -20,13 +21,11 @@ margin: 0px;
 
 }
 .moviedata-style{
-align: center;
+
 width: 100%;
-padding: 0px;
+padding: 10px;
 margin: 0px;
-color: white;
-}
-.vaadin-textfield{
 
 }
+
 
