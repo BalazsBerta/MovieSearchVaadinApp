@@ -1,25 +1,22 @@
 package com.example.MovieSearch.service;
 
 
-import com.vaadin.flow.component.html.Image;
-import netscape.javascript.JSException;
-import netscape.javascript.JSObject;
+
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import org.apache.commons.io.IOUtils;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.http.MediaType;
+
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.Console;
+
 import java.io.IOException;
-import java.io.InputStream;
+
 
 @RestController
 @Service
@@ -48,13 +45,11 @@ public class MovieService {
     }
 
     public JSONArray returnRatings() throws JSONException, IOException {
-        JSONArray ratings = getMovieData().getJSONArray("Ratings");
-        return ratings;
+        return getMovieData().getJSONArray("Ratings");
     }
 
     public JSONArray returnMovies() throws JSONException, IOException {
-        JSONArray multipleMovie = getMovieData().getJSONArray("Search");
-        return multipleMovie;
+        return getMovieData().getJSONArray("Search");
     }
 
     public String getTitle() {

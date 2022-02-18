@@ -34,13 +34,11 @@ public class MainView extends VerticalLayout {
 
     private Label title;
     private Label year;
-    private Label rated;
     private Label runtime;
     private Label plot;
     private TextField movieTitle;
     private Button multipleSearch;
     private Image image;
-    private Image posterImages;
     private Icon iconForw;
     private Icon iconBackw;
     private int count;
@@ -54,19 +52,17 @@ public class MainView extends VerticalLayout {
 
 
     public MainView() throws JSONException, IOException {
-        CreateHeader();
-        SearchForm();
-        MovieDataView();
+        createHeader();
+        searchForm();
+        movieDataView();
 
         multipleSearch.addClickListener(ClickEvent -> {
             if (!movieTitle.getValue().equals("")) {
                 try {
                     iconForw.setVisible(true);
                     iconBackw.setVisible(true);
-                    Update2();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
+                    mainUpdate();
+                } catch (JSONException | IOException e) {
                     e.printStackTrace();
                 }
             } else {
@@ -75,18 +71,14 @@ public class MainView extends VerticalLayout {
                 notification.show("please enter  valid MovieTitle");
             }
 
-            /* lint to an another page ->*/ /*UI.getCurrent().navigate("main");*/
         });
         count = 1;
         iconForw.addClickListener(ClickEvent -> {
 
-            //PostersSteping(count);
             try {
-                Update();
+                update();
                 count = count + 1;
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
+            } catch (JSONException | IOException e) {
                 e.printStackTrace();
             } catch (IndexOutOfBoundsException e) {
                 notification.show("A lista végére értél!");
@@ -96,11 +88,9 @@ public class MainView extends VerticalLayout {
         iconBackw.addClickListener(ClickEvent -> {
             //PostersSteping(count);
             try {
-                Update();
+                update();
                 count = count - 1;
-            } catch (JSONException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
+            } catch (JSONException | IOException e) {
                 e.printStackTrace();
             } catch (IndexOutOfBoundsException e) {
                 notification.show(" A lista végére értél");
@@ -110,19 +100,19 @@ public class MainView extends VerticalLayout {
     }
 
 
-    public void CreateHeader() {
+    public void createHeader() {
         HorizontalLayout header = new HorizontalLayout();
-        H1 title = new H1("Vaadin Movie app");
+        H1 mainTitle = new H1("Vaadin Movie app");
         header.addClassName("header-style");
 
         header.setSizeFull();
-        header.add(title);
+        header.add(mainTitle);
         header.setJustifyContentMode(JustifyContentMode.CENTER);
         add(header);
 
     }
 
-    public void SearchForm() {
+    public void searchForm() {
         VerticalLayout mainview = new VerticalLayout();
 
 
@@ -140,7 +130,7 @@ public class MainView extends VerticalLayout {
 
     }
 
-    public void MovieDataView() {
+    public void movieDataView() {
         HorizontalLayout mainBody = new HorizontalLayout();
         VerticalLayout movieView = new VerticalLayout();
 
@@ -150,7 +140,7 @@ public class MainView extends VerticalLayout {
 
         addClassName("moviedata-style");
 
-        //PosterView----------
+        //Poszter és az ikonok megjelenenítése
 
         image = new Image();
         iconForw = new Icon(VaadinIcon.CHEVRON_CIRCLE_RIGHT);
@@ -158,12 +148,13 @@ public class MainView extends VerticalLayout {
         iconBackw = new Icon(VaadinIcon.CHEVRON_CIRCLE_LEFT);
         iconBackw.setVisible(false);
         posterCount = new Label();
-        posterImages = new Image();
-        // Movie data view --------------
+        Image posterImages = new Image();
+
+        //Film adatok megjelenitése
 
         title = new Label();
         year = new Label();
-        rated = new Label();
+        Label rated = new Label();
         runtime = new Label();
         meta = new Label();
         imdb = new Label();
@@ -227,16 +218,16 @@ public class MainView extends VerticalLayout {
     }
 */
 
-    public void Update() throws JSONException, IOException {
+    public void update() throws JSONException, IOException {
         //-- Plakát váltás közben, a listában lévő cím alapján, lekéri a filmek adatait.
-        String Mtitle = movieNameList.get(count);
+        String mTitle = movieNameList.get(count);
         try {
-            movieService.setTitle(Mtitle);
+            movieService.setTitle(mTitle);
 
             JSONObject mainObject = movieService.getMovieData();
 
-            String movieTitle = mainObject.getString("Title");
-            title.setText(movieTitle);
+            String movieCaption = mainObject.getString("Title");
+            title.setText(movieCaption);
 
             int releaseYear = mainObject.getInt("Year");
             year.setText("movie realase date: " + releaseYear);
@@ -247,7 +238,6 @@ public class MainView extends VerticalLayout {
             String moviePlot = mainObject.getString("Plot");
             plot.setText(moviePlot);
 
-            int posterCounts = count;
             posterCount.setText(count + 1 + "/10");
             String posterke = mainObject.getString("Poster");
             image.setSrc(posterke);
@@ -263,19 +253,19 @@ public class MainView extends VerticalLayout {
         }
     }
 
-    private List<String> posterList = new ArrayList<String>();
-    private List<String> movieNameList = new ArrayList<String>();
+    private List<String> posterList = new ArrayList<>();
+    private List<String> movieNameList = new ArrayList<>();
 
-    public void Update2() throws JSONException, IOException {
+    public void mainUpdate() throws JSONException, IOException {
 
-        String Mtitle = movieTitle.getValue();
+        String mTitle = movieTitle.getValue();
         try {
-//--- az első film megjelenítése a MovieDataViewnél
-            movieService.setTitle(Mtitle);
+    //--- az első film megjelenítése a MovieDataViewnél
+            movieService.setTitle(mTitle);
             JSONObject mainObject = movieService.getMovieData();
 
-            String movieTitle = mainObject.getString("Title");
-            title.setText(movieTitle);
+            String movieCaption = mainObject.getString("Title");
+            title.setText(movieCaption);
 
             int releaseYear = mainObject.getInt("Year");
             year.setText("movie realase date: " + releaseYear);
@@ -298,13 +288,11 @@ public class MainView extends VerticalLayout {
 
 
 //-------------------------------------------------------------------------------------------------
-//leszedett 10 film és posztereik listába pakolása
-            System.out.println(movieService.getMultipleMovieData());
+        //leszedett 10 film és posztereik listába pakolása
 
             JSONObject multipleMainObject = movieService.getMultipleMovieData();
 
             JSONArray outMovie = new JSONArray();
-            String type = "";
             JSONArray multipleMovies = multipleMainObject.getJSONArray("Search");
 
             for (int i = 0; i < multipleMovies.length(); i++) {
@@ -316,13 +304,12 @@ public class MainView extends VerticalLayout {
                 outPosters.put(multipleMovies.getJSONObject(i).getString("Poster"));
 
             }
-            posterList = new ArrayList<String>();
+            posterList = new ArrayList<>();
             for (int i = 0; i < outPosters.length(); i++) {
                 posterList.add(outPosters.getString(i));
             }
-            // posterImages.setSrc(posterList.get(0));
 
-            movieNameList = new ArrayList<String>();
+            movieNameList = new ArrayList<>();
             for (int i = 0; i < outMovie.length(); i++) {
                 movieNameList.add(outMovie.getString(i));
             }
