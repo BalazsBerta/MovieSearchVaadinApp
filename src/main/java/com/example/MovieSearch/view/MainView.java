@@ -1,6 +1,7 @@
 package com.example.MovieSearch.view;
 
 import com.example.MovieSearch.service.MovieService;
+import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.H1;
@@ -56,6 +57,7 @@ public class MainView extends VerticalLayout {
         searchForm();
         movieDataView();
 
+
         multipleSearch.addClickListener(ClickEvent -> {
             if (!movieTitle.getValue().equals("")) {
                 try {
@@ -70,6 +72,7 @@ public class MainView extends VerticalLayout {
                 iconBackw.setVisible(false);
                 notification.show("please enter  valid MovieTitle");
             }
+
 
         });
         count = 1;
@@ -118,6 +121,7 @@ public class MainView extends VerticalLayout {
 
         movieTitle = new TextField("please enter a movie title");
         multipleSearch = new Button("Search");
+        multipleSearch.addClickShortcut(Key.ENTER);
 
         movieTitle.setWidth("30%");
         multipleSearch.setThemeName("primary");
@@ -150,6 +154,11 @@ public class MainView extends VerticalLayout {
         posterCount = new Label();
         Image posterImages = new Image();
 
+        mainBody.setSizeFull();
+        moviePosterView.setSizeFull();
+        posterImages.setSizeFull();
+        posterImages.setMaxHeight("505");
+        posterImages.setMaxWidth("500");
         //Film adatok megjelenitése
 
         title = new Label();
@@ -183,7 +192,6 @@ public class MainView extends VerticalLayout {
         ratingView.add(meta, imdb, imdbvotes);
         movieView.add(title, year, rated, runtime, plot, ratingView);
         iconLayout.add(iconBackw, iconForw, posterCount);
-
         moviePosterView.add(image, posterImages, iconLayout);
 
 
